@@ -201,3 +201,23 @@ app.delete('/api/tasks/:id', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server running on port http://localhost:${PORT}`);
 });
+const bcrypt = require('bcryptjs');
+app.post('/api/register', async (req, res) => {
+  const { username, email, password } = req.body;
+
+  const existingUser = await User.findOne({ where: { email } });
+
+  if (existingUser) {
+    return res.status(400).json({ message: 'User already exists' });
+  }
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  await User.create({
+    username,
+    email,
+    password: hashedPassword
+  });
+
+  res.json({ message: 'User registered successfully' });
+});
